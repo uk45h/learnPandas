@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
+# In[1]:
 
 
 import pandas as pd
@@ -30,12 +30,52 @@ fixed_df[['registration_dttm','hour']].head(10)
 fixed_df[['salary','hour']].plot.scatter(x="salary",y='hour')
 
 
-# In[41]:
+# In[19]:
 
 
 #need dependency 'pyarrow' or/and dependency 'fastparquet'
-par=pd.read_parquet('sample-data/parquet/userdata1.parquet', engine='pyarrow')
+par1=pd.read_parquet('sample-data/parquet/userdata1.parquet', engine='fastparquet', index='id')
 par[:3]
+
+
+# In[18]:
+
+
+par=pd.read_parquet('sample-data/parquet', engine='fastparquet')
+par[:3]
+
+
+# In[3]:
+
+
+from pandasql import sqldf
+pysqldf = lambda q: sqldf(q, globals())
+
+
+# In[20]:
+
+
+q = """SELECT count(*) 
+       FROM par1 ;"""
+
+names = pysqldf(q)
+names.head(5)
+
+
+# In[21]:
+
+
+q = """SELECT count(*) 
+       FROM par ;"""
+
+names = pysqldf(q)
+names.head(5)
+
+
+# In[22]:
+
+
+par.to_csv('sample-data/parquet_to_csv.csv')
 
 
 # In[ ]:
