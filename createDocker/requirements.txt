@@ -1,2 +1,4 @@
 fastparquet
 pandasql
+sqlalchemy
+cx_Oracle

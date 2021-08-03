@@ -1,7 +1,43 @@
 # Start from a core stack version
 FROM jupyter/scipy-notebook
+
 # Install from requirements.txt file
 COPY --chown=${NB_UID}:${NB_GID} requirements.txt /tmp/
 RUN pip install --quiet --no-cache-dir --requirement /tmp/requirements.txt && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
+	
+WORKDIR /usr/src/app
+
+# Copy over the drivers
+# Oracle 
+COPY drivers/oracle-instantclient-basic-linuxx64.rpm .
+COPY drivers/oracle-instantclient-odbc-linuxx64.rpm .
+
+USER root
+RUN apt-get update
+
+# unixODBC
+RUN apt-get install -y unixodbc-dev unixodbc
+
+# The oracle base driver needs this
+RUN apt-get install -y libaio1
+
+# Needed to install the oracle .rpm files
+RUN apt-get install -y alien
+
+# Oracle ODBC drivers
+
+# Oracle 11.2
+# 1. Install the oracle instant client
+RUN alien -i oracle-instantclient-basic-linuxx64.rpm
+RUN alien -i oracle-instantclient-odbc-linuxx64.rpm
+# 2. Setup the client
+ENV LD_LIBRARY_PATH /usr/lib/oracle/11.2/client64/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+# 3. Make sure links are set
+RUN ldconfig
+
+# Install pyodbc
+RUN pip install pyodbc
+
+WORKDIR /home/jovyan/work
